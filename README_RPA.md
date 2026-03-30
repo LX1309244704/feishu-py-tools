@@ -1,125 +1,92 @@
 
 ---
 
-## 💬 微信全生态使用指南
-现在支持三种微信场景：个人微信、企业微信、微信公众号。
+## 📤 内容平台自动发布使用指南
+现在支持小红书、抖音、视频号三个主流内容平台一键自动发布，无需手动操作！
+
+### 插件信息
+| 插件名 | 功能 |
+|--------|------|
+| `publish/content@1.0.0` | 内容自动发布：支持小红书图文/视频、抖音视频、微信视频号发布 |
+
+### 特点
+✅ **无需API权限**：基于浏览器自动化模拟人工操作，不需要申请平台开发者权限
+✅ **免重复登录**：支持保存cookies，登录一次后续自动登录
+✅ **多平台一键发布**：一次配置，同时发布到多个平台
+✅ **支持定时发布**：可以设置未来的发布时间，平台支持定时发布即可
+✅ **支持标签自动添加**：自动添加话题标签
+✅ **支持批量上传**：小红书支持多图上传
 
 ---
 
-### 🏢 企业微信使用示例
-#### 发送文本消息到企业微信
+### 使用示例
+#### 示例1：发布图文笔记到小红书
 ```yaml
 steps:
-  - name: 发送企业微信消息
-    uses: wechat/work@1.0.0
+  - name: 发布小红书笔记
+    uses: publish/content@1.0.0
     with:
-      action: send_text
-      corp_id: "wwxxxxxx"  # 企业ID
-      corp_secret: "xxxxxx" # 应用Secret
-      agent_id: 1000001    # 应用ID
-      receiver: "zhangsan|lisi"  # 接收人userid，多个用|分隔，或者@all
-      content: "今日销售报表已生成，请查收！"
-```
-
-#### 发送Markdown消息到企业微信群
-```yaml
-steps:
-  - name: 发送Markdown到群
-    uses: wechat/work@1.0.0
-    with:
-      action: send_to_group
-      corp_id: "wwxxxxxx"
-      corp_secret: "xxxxxx"
-      agent_id: 1000001
-      chat_id: "wrxxxxxx"  # 群ID
-      msg_type: "markdown"
+      platform: xiaohongshu
+      title: "3分钟学会RPA自动化，告别重复工作"
       content: |
-        ## 📊 今日销售数据
-        - 总销售额：¥123,456
-        - 订单数：123
-        - 转化率：35.2%
-        > 数据截止到今日18:00
+        今天给大家分享一款超级好用的RPA工具！
+        不用写代码，低代码就能实现办公自动化
+        支持飞书、微信、浏览器自动化，效率提升10倍！
+        
+        适合职场人、自媒体、创业者使用~
+      files:
+        - "./封面.png"
+        - "./内容1.png"
+        - "./内容2.png"
+      tags: ["RPA", "自动化", "办公技巧", "效率工具"]
+      cookies_path: "./xiaohongshu_cookies.json"  # 保存登录状态
 ```
 
-#### 获取企业通讯录
+#### 示例2：发布视频到抖音
 ```yaml
 steps:
-  - name: 获取部门用户列表
-    uses: wechat/work@1.0.0
+  - name: 发布抖音视频
+    uses: publish/content@1.0.0
     with:
-      action: get_user_list
-      corp_id: "wwxxxxxx"
-      corp_secret: "xxxxxx"
-      department_id: 1
-      fetch_child: 1
-    register: user_list
+      platform: douyin
+      title: "RPA自动化教程"
+      content: |
+        教你用RPA自动发消息，批量处理Excel，太爽了！
+        #RPA #编程 #办公技巧 #效率
+      files: ["./rpa_tutorial.mp4"]
+      tags: ["RPA", "自动化", "编程"]
+      cookies_path: "./douyin_cookies.json"
 ```
 
----
-
-### 🔔 微信公众号使用示例
-#### 发送模板消息给用户
-```yaml
-steps:
-  - name: 发送订单通知
-    uses: wechat/mp@1.0.0
-    with:
-      action: send_template
-      app_id: "wxxxxxxx"  # 公众号AppID
-      app_secret: "xxxxxx" # 公众号AppSecret
-      openid: "o7xxxxxx"   # 用户openid
-      template_id: "xxxxxx" # 模板ID
-      url: "https://example.com/order/123" # 点击跳转链接
-      data:
-        first:
-          value: "您的订单已发货"
-          color: "#173177"
-        order_no:
-          value: "2024033012345"
-          color: "#173177"
-        product_name:
-          value: "RPA机器人套餐"
-          color: "#173177"
-        remark:
-          value: "点击查看物流详情"
-          color: "#173177"
-```
-
-#### 发送客服消息
-```yaml
-steps:
-  - name: 回复用户消息
-    uses: wechat/mp@1.0.0
-    with:
-      action: send_custom_message
-      app_id: "wxxxxxxx"
-      app_secret: "xxxxxx"
-      openid: "o7xxxxxx"
-      content: "感谢您的咨询，有任何问题随时联系我们~"
-```
-
-#### 获取关注用户列表
-```yaml
-steps:
-  - name: 获取公众号粉丝列表
-    uses: wechat/mp@1.0.0
-    with:
-      action: get_user_list
-      app_id: "wxxxxxxx"
-      app_secret: "xxxxxx"
-    register: fans_list
-```
-
----
-
-### 🔑 环境变量配置（推荐）
-可以将密钥配置到环境变量中，避免在流程文件中明文存储：
+#### 示例3：多平台一键发布
+直接使用内置模板：
 ```bash
-# 个人微信无需配置，扫码登录
-export WECHAT_WORK_CORP_ID="wwxxxxxx"
-export WECHAT_WORK_CORP_SECRET="xxxxxx"
-export WECHAT_WORK_AGENT_ID="1000001"
-export WECHAT_MP_APP_ID="wxxxxxxx"
-export WECHAT_MP_APP_SECRET="xxxxxx"
+opencli rpa init 多平台发布 -t multi_platform_publish
 ```
-配置后流程文件中不需要再填这些参数，自动从环境变量读取。
+修改内容和文件路径后直接执行，就可以同时发布到小红书、抖音、视频号三个平台。
+
+---
+
+### 使用步骤
+1. **首次使用需要登录**：第一次执行时会打开浏览器，你扫码登录对应的平台即可，登录后cookies会自动保存到指定路径，后续不用再扫码。
+2. **准备内容**：提前做好图片/视频，写好标题、正文、标签。
+3. **执行流程**：运行发布流程，自动完成上传、填内容、加标签、点击发布全流程。
+4. **查看结果**：浏览器会保留打开状态，你可以确认发布结果。
+
+---
+
+### 注意事项
+1. **首次登录需要手动扫码**：建议用常用的设备登录，避免触发风控。
+2. **发布频率不要太高**：短时间内大量发布可能会被平台限制，建议间隔至少30分钟。
+3. **内容要合规**：不要发布违规内容，否则会被平台处罚。
+4. **元素选择器可能需要调整**：平台页面更新时，可能需要微调代码中的选择器，我可以帮你免费维护更新。
+
+---
+
+### 可扩展的平台
+后续可以根据需要扩展支持：
+- B站
+- 知乎
+- 公众号
+- 微博
+- 快手等更多内容平台

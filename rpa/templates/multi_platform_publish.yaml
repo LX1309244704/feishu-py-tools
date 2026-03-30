@@ -1,0 +1,73 @@
+# 多平台一键发布流程模板
+name: 多平台内容一键发布
+description: 自动发布内容到小红书、抖音、视频号
+version: 1.0.0
+
+trigger:
+  type: manual
+
+variables:
+  content_title: "RPA工具使用教程：3分钟实现办公自动化"
+  content_desc: |
+    今天给大家分享一款超级好用的RPA自动化工具！
+    不用写代码，YAML就能定义流程，支持飞书、微信、浏览器自动化
+    普通人也能轻松实现办公自动化，提高工作效率10倍！
+    
+    #RPA #自动化 #办公技巧 #效率工具 #飞书 #微信自动化
+  media_files:
+    - "./教程封面.png"
+    - "./教程内容1.png"
+    - "./教程内容2.png"
+  tags: ["RPA", "自动化", "办公技巧", "效率工具"]
+  publish_time: "2026-03-31 18:00"
+
+steps:
+  # 1. 发布到小红书
+  - name: 发布到小红书
+    uses: publish/content@1.0.0
+    with:
+      platform: xiaohongshu
+      title: "${{ globals.content_title }}"
+      content: "${{ globals.content_desc }}"
+      files: "${{ globals.media_files }}"
+      tags: "${{ globals.tags }}"
+      # publish_time: "${{ globals.publish_time }}"  # 定时发布
+      cookies_path: "./xiaohongshu_cookies.json"
+  
+  # 2. 发布到抖音
+  - name: 发布到抖音
+    uses: publish/content@1.0.0
+    with:
+      platform: douyin
+      title: "${{ globals.content_title }}"
+      content: "${{ globals.content_desc }}"
+      files: ["./教程视频.mp4"]  # 抖音用视频
+      tags: "${{ globals.tags }}"
+      cookies_path: "./douyin_cookies.json"
+  
+  # 3. 发布到视频号
+  - name: 发布到视频号
+    uses: publish/content@1.0.0
+    with:
+      platform: wechat_channel
+      title: "${{ globals.content_title }}"
+      content: "${{ globals.content_desc }}"
+      files: ["./教程视频.mp4"]
+      tags: "${{ globals.tags }}"
+      cookies_path: "./wechat_channel_cookies.json"
+
+# 发布成功通知
+on_success:
+  - name: 发布成功通知
+    uses: wechat/work@1.0.0
+    with:
+      action: send_text
+      content: "✅ 内容已成功发布到所有平台！"
+
+# 发布失败告警
+on_failure:
+  - name: 发布失败告警
+    uses: wechat/work@1.0.0
+    with:
+      action: send_text
+      content: "❌ 内容发布失败！错误：${{ error }}"
