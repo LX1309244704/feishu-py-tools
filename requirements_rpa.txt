@@ -21,3 +21,7 @@ concurrent-futures>=3.1.1
 
 # 飞书相关（已在主requirements中）
 # lark-oapi>=1.2.0
+
+# 微信插件
+itchat-uos>=1.5.0.dev0  # 支持最新微信版本
+Pillow>=9.0.0  # 显示登录二维码

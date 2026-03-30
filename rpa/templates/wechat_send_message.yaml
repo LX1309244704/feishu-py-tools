@@ -1,0 +1,54 @@
+# 微信自动发消息流程模板
+name: 微信自动发消息
+description: 定时给微信好友/群发送消息、文件、图片
+version: 1.0.0
+
+trigger:
+  type: manual  # 可以改成schedule，比如每天9点发送：cron: "0 9 * * *"
+
+variables:
+  receiver: "张三"  # 好友昵称/备注/群名
+  message: "早上好！这是自动发送的消息~"
+
+steps:
+  # 1. 发送文本消息
+  - name: 发送文本消息
+    uses: wechat/message@1.0.0
+    with:
+      receiver: "${{ globals.receiver }}"
+      msg_type: text
+      content: "${{ globals.message }}"
+      hot_reload: true  # 保持登录状态，下次不用扫码
+  
+  # 2. 发送图片（需要时取消注释）
+  # - name: 发送图片
+  #   uses: wechat/message@1.0.0
+  #   with:
+  #     receiver: "${{ globals.receiver }}"
+  #     msg_type: picture
+  #     file_path: "./图片.png"
+  
+  # 3. 发送文件（需要时取消注释）
+  # - name: 发送销售报表
+  #   uses: wechat/message@1.0.0
+  #   with:
+  #     receiver: "业务群"
+  #     msg_type: file
+  #     file_path: "./销售报表.xlsx"
+  #     at_all: true  # 群聊时@所有人
+
+# 发送成功后通知
+on_success:
+  - name: 发送成功通知
+    uses: feishu/message@1.0.0
+    with:
+      receive_id: "ou_xxxxxx"
+      content: "微信消息发送成功！接收人：${{ globals.receiver }}"
+
+# 发送失败告警
+on_failure:
+  - name: 失败告警
+    uses: feishu/message@1.0.0
+    with:
+      receive_id: "ou_xxxxxx"
+      content: "微信消息发送失败！错误：${{ error }}"

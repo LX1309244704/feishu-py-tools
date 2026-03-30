@@ -1,0 +1,32 @@
+# 微信联系人导出流程模板
+name: 导出微信联系人
+description: 导出所有微信好友和群聊列表到Excel
+version: 1.0.0
+
+trigger:
+  type: manual
+
+steps:
+  # 1. 获取好友列表
+  - name: 获取好友列表
+    uses: wechat/contact@1.0.0
+    with:
+      action: list_friends
+    register: friends_result
+  
+  # 2. 获取群列表
+  - name: 获取群列表
+    uses: wechat/contact@1.0.0
+    with:
+      action: list_groups
+    register: groups_result
+  
+  # 3. 导出到Excel
+  - name: 导出联系人到Excel
+    uses: data/process@1.0.0
+    with:
+      action: export_excel
+      data:
+        friends: "${{ steps.获取好友列表.output.result }}"
+        groups: "${{ steps.获取群列表.output.result }}"
+      output_path: "./微信联系人_${{ today('%Y%m%d') }}.xlsx"

@@ -146,6 +146,12 @@ content: "今日日期：{{ today('%Y年%m月%d日') }}"
 | `feishu/message@1.0.0` | 消息发送：文本、富文本、卡片、文件 |
 | `feishu/doc@1.0.0` | 文档操作：创建、读取、更新、导出 |
 
+### 微信生态插件
+| 插件名 | 功能 |
+|--------|------|
+| `wechat/message@1.0.0` | 微信消息发送：给好友/群发送文本、图片、文件、视频 |
+| `wechat/contact@1.0.0` | 微信联系人管理：获取好友列表、群列表、搜索联系人 |
+
 ### 基础插件
 | 插件名 | 功能 |
 |--------|------|
@@ -168,6 +174,17 @@ content: "今日日期：{{ today('%Y年%m月%d日') }}"
 - 工作日18点自动执行
 - 统计当日销售数据
 - 生成Excel报表并发送群通知
+
+### 3. 微信自动发消息
+`rpa/templates/wechat_send_message.yaml`
+- 定时给微信好友/群发送消息
+- 支持发送文本、图片、文件
+- 支持群聊@所有人
+
+### 4. 导出微信联系人
+`rpa/templates/wechat_export_contacts.yaml`
+- 导出所有微信好友和群列表
+- 自动保存为Excel文件
 
 ---
 
@@ -274,7 +291,66 @@ CMD ["opencli", "rpa", "server"]
 
 ---
 
-## ❓ 常见问题
+## 📱 微信插件使用指南
+### 安装依赖
+```bash
+pip install itchat-uos Pillow
+```
+
+### 快速使用
+#### 示例1：给好友发消息
+```yaml
+steps:
+  - name: 发送消息
+    uses: wechat/message@1.0.0
+    with:
+      receiver: "张三"  # 好友昵称/备注
+      msg_type: text
+      content: "这是自动发送的消息！"
+```
+
+#### 示例2：给群聊发文件并@所有人
+```yaml
+steps:
+  - name: 发送报表到业务群
+    uses: wechat/message@1.0.0
+    with:
+      receiver: "业务部群"
+      msg_type: file
+      file_path: "./销售报表.xlsx"
+      at_all: true
+```
+
+#### 示例3：导出所有联系人
+```yaml
+steps:
+  - name: 导出好友列表
+    uses: wechat/contact@1.0.0
+    with:
+      action: list_friends
+    register: friends
+  
+  - name: 导出群列表
+    uses: wechat/contact@1.0.0
+    with:
+      action: list_groups
+    register: groups
+```
+
+### 使用说明
+1. **首次使用需要扫码登录**：执行流程时会在命令行显示二维码，用微信扫码登录即可
+2. **登录状态保持**：默认开启热重载，登录后会生成`wechat_session.pkl`文件，7天内不用重新扫码
+3. **支持的消息类型**：text（文本）、picture（图片）、file（文件）、video（视频）
+4. **搜索优先级**：先匹配好友昵称，再匹配群名，最后匹配备注名
+
+### 注意事项
+⚠️ 个人微信自动化有一定的账号风险，建议：
+1. 不要频繁发送大量消息，避免被封号
+2. 不要发送违规内容
+3. 建议使用小号测试
+4. 高频使用建议用企业微信方案
+
+---
 
 ### Q: 如何调试流程？
 A: 1. 使用`opencli rpa validate`先验证格式 2. 手动执行看日志 3. 调试时加上`-v`参数显示详细日志。
