@@ -1,0 +1,81 @@
+# 结合官方 CLI 和微元的跨平台自动化流程
+# 使用官方 CLI 获取飞书数据，通过微元发送到微信
+
+name: 飞书官方CLI+微元联动示例
+description: 使用官方CLI获取飞书日程，自动发送到企业微信
+trigger:
+  type: manual
+
+variables:
+  # 配置说明：
+  # 1. 确保已安装官方CLI: npm install -g @larksuite/cli
+  # 2. 确保已登录: lark-cli auth login --recommend
+  # 3. 或在微元GUI中配置好企业微信参数
+
+steps:
+  # ===== 步骤1：使用官方 CLI 获取今日日程 =====
+  - name: 获取今日日程（官方CLI快捷命令）
+    uses: lark/cli@1.0.0
+    with:
+      command: shortcut
+      service: calendar
+      shortcut: +agenda
+      format: json
+    register: calendar_data
+  
+  # ===== 步骤2：使用官方 CLI 获取明天的会议 =====
+  - name: 获取明日会议（官方CLI API命令）
+    uses: lark/cli@1.0.0
+    with:
+      command: api
+      service: calendar
+      method: events/instance_view
+      params:
+        calendar_id: primary
+        start_time: "${{ tomorrow_timestamp() }}"
+        end_time: "${{ tomorrow_end_timestamp() }}"
+    register: tomorrow_events
+  
+  # ===== 步骤3：使用微元处理数据，生成报告 =====
+  - name: 生成日程汇总
+    uses: data/process@1.0.0
+    with:
+      action: format_report
+      data: "${{ steps.获取今日日程.output.json }}"
+      template: |
+        📅 今日日程汇总
+        ───────────────
+        ${{ steps.获取今日日程.output.json }}
+        
+        📅 明日会议预览
+        ───────────────
+        ${{ steps.获取明日会议.output.json }}
+    register: report
+  
+  # ===== 步骤4：使用微元发送到企业微信 =====
+  - name: 发送到企业微信（微元插件）
+    uses: wechat/work@1.0.0
+    with:
+      action: send_markdown
+      corp_id: "${{ env.WECHAT_WORK_CORP_ID }}"
+      corp_secret: "${{ env.WECHAT_WORK_CORP_SECRET }}"
+      agent_id: "${{ env.WECHAT_WORK_AGENT_ID }}"
+      receiver: "@all"
+      content: |
+        ## 📅 飞书日程日报
+        
+        由官方 CLI + 微元自动生成
+        
+        ${{ steps.生成日程汇总.output.formatted }}
+        
+        ---
+        发送时间：${{ now() }}
+
+# 执行失败通知
+on_failure:
+  - name: 发送失败通知
+    uses: wechat/work@1.0.0
+    with:
+      action: send_text
+      receiver: "管理员"
+      content: "❌ 日程同步失败：${{ error }}"
