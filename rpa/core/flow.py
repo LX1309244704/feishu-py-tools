@@ -4,10 +4,10 @@ RPA流程模型
 import yaml
 import json
 import jsonschema
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
 from datetime import datetime
-from .schemas import get_schema
+from rpa.schemas import get_schema
 
 
 class Flow:
