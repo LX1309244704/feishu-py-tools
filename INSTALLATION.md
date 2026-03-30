@@ -15,7 +15,14 @@ cd weiyuan
 pip install -r requirements.txt
 ```
 
-### 3. Install Optional Dependencies (Choose what you need)
+### 3. Install Lark CLI (Recommended)
+
+```bash
+npm install -g @larksuite/cli
+lark-cli auth login --recommend
+```
+
+### 4. Install Optional Dependencies (Choose what you need)
 
 #### For RPA Features
 ```bash
@@ -27,7 +34,7 @@ pip install -r requirements_rpa.txt
 pip install -r requirements_gui.txt
 ```
 
-### 4. Configuration
+### 5. Configuration
 
 Copy the example environment file and configure:
 
@@ -36,7 +43,7 @@ cp .env.example .env
 # Edit .env with your configuration
 ```
 
-### 5. Verify Installation
+### 6. Verify Installation
 
 ```bash
 python -m rpa --help
@@ -51,6 +58,7 @@ python -m rpa --help
 - Python 3.8 or higher
 - pip (Python package manager)
 - (Optional) Node.js 16+ for Lark CLI
+- npm (comes with Node.js)
 
 ### Step-by-Step Installation
 
@@ -75,12 +83,26 @@ pip install -r requirements.txt
 
 This installs:
 - Core dependencies (click, requests, yaml, etc.)
-- Lark/Feishu SDK
+- Lark/Feishu SDK (lark-oapi)
 - AI integration (OpenAI, Anthropic)
 - Data processing libraries
 - Web framework
 
-#### Step 4: Install RPA Dependencies (Optional)
+#### Step 4: Install Lark CLI (Recommended but Optional)
+
+```bash
+# Install via npm
+npm install -g @larksuite/cli
+
+# Login to Lark
+lark-cli auth login --recommend
+```
+
+**Note:** Lark CLI is a Node.js package, not a Python package. It's required if you want to use the official Lark CLI integration.
+
+**Alternative:** If you don't have Node.js installed or don't need Lark CLI features, you can skip this step. Weiyuan will use the lark-oapi Python SDK instead.
+
+#### Step 5: Install RPA Dependencies (Optional)
 
 ```bash
 pip install -r requirements_rpa.txt
@@ -94,7 +116,7 @@ This installs:
 
 **Note:** This may take longer to install due to heavy dependencies like PyTorch and PaddlePaddle.
 
-#### Step 5: Install GUI Dependencies (Optional)
+#### Step 6: Install GUI Dependencies (Optional)
 
 ```bash
 pip install -r requirements_gui.txt
@@ -103,15 +125,6 @@ pip install -r requirements_gui.txt
 This installs:
 - PySide6 (Qt framework)
 - PyInstaller (for building executables)
-
-#### Step 6: Install Lark CLI (Recommended)
-
-```bash
-npm install -g @larksuite/cli
-lark-cli auth login --recommend
-```
-
-Follow the browser prompt to login with your Lark account.
 
 ---
 
@@ -125,8 +138,6 @@ UnicodeDecodeError: 'ascii' codec can't decode byte 0xe4...
 ```
 
 **Solution:**
-All requirements files have been fixed to use English comments only. If you still see this error:
-
 ```bash
 # Set environment variable
 export PYTHONIOENCODING=utf-8
@@ -179,6 +190,35 @@ PaddlePaddle requires specific Python versions and OS. Check official documentat
 
 Alternative: Skip OCR features if not needed.
 
+### Issue 5: npm not found (when installing Lark CLI)
+
+**Problem:**
+```
+npm: command not found
+```
+
+**Solution:**
+
+Install Node.js first:
+
+```bash
+# On Ubuntu/Debian
+sudo apt update
+sudo apt install nodejs npm
+
+# On macOS
+brew install node
+
+# On Windows
+# Download from https://nodejs.org/
+```
+
+Then retry:
+
+```bash
+npm install -g @larksuite/cli
+```
+
 ---
 
 ## Verification
@@ -198,12 +238,31 @@ python -c "import rpa; print('✅ Installation successful!')"
 
 ---
 
+## Minimal Installation (Basic Features Only)
+
+If you only need basic RPA features without heavy dependencies:
+
+```bash
+pip install click requests pyyaml jsonschema jinja2
+```
+
+This will give you:
+- Basic RPA flow execution
+- YAML/JSON flow parsing
+- Variable engine
+- Plugin system
+
+---
+
 ## Uninstall
 
 ```bash
 pip uninstall -r requirements.txt -y
 pip uninstall -r requirements_rpa.txt -y
 pip uninstall -r requirements_gui.txt -y
+
+# Uninstall Lark CLI (Node.js package)
+npm uninstall -g @larksuite/cli
 ```
 
 ---
@@ -214,6 +273,21 @@ pip uninstall -r requirements_gui.txt -y
 - Read [README_RPA.md](README_RPA.md) for RPA usage guide
 - Read [README_GUI.md](README_GUI.md) for GUI client guide
 - Read [TUTORIAL_WITH_SCREENS.md](docs/TUTORIAL_WITH_SCREENS.md) for detailed tutorials
+- Read [LARK_CLI_INTEGRATION.md](docs/LARK_CLI_INTEGRATION.md) for Lark CLI usage
+
+---
+
+## Summary of Dependencies
+
+### Required (Basic Functionality)
+- Python 3.8+
+- Core Python packages (click, requests, yaml, etc.)
+
+### Optional (Extended Features)
+- Node.js + npm (for Lark CLI)
+- PyTorch, PaddlePaddle (for AI/OCR)
+- PySide6 (for GUI client)
+- Selenium, PyAutoGUI (for UI automation)
 
 ---
 

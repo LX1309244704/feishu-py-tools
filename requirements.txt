@@ -9,7 +9,6 @@ rich>=13.0.0
 
 # Lark/Feishu
 lark-oapi>=1.2.0
-lark-cli-wrapper>=1.0.0
 
 # AI integration
 openai>=1.0.0
