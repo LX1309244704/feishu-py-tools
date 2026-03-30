@@ -1,23 +1,27 @@
-# FeiShu-Py-Tools - 飞书Python工具箱
+# 微元 Weiyuan - 全生态RPA自动化平台
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
-[![Feishu](https://img.shields.io/badge/Feishu-Lark-orange.svg)](https://www.feishu.cn)
+[![RPA](https://img.shields.io/badge/RPA-Automation-green.svg)](https://github.com/LX1309244704/weiyuan)
 
-> 基于飞书官方CLI的Python增强版飞书管理工具，专注多维表格自动化和AI集成
+> 一站式全生态RPA自动化平台，支持飞书、微信、抖音、小红书等多平台自动化
 
 ## 🌟 项目简介
 
-**FeiShu-Py-Tools**是一个功能强大的飞书Python工具箱，在飞书官方CLI基础上，增强了多维表格自动化、AI集成、工作流自动化和数据可视化能力。
+**微元（Weiyuan）**是一个功能强大的全生态RPA自动化平台，支持：
+- 🚀 **飞书生态**：多维表格、消息、文档自动化
+- 💬 **微信全生态**：个人微信、企业微信、公众号
+- 📱 **内容平台**：小红书、抖音、视频号自动发布
+- 🖥️ **UI自动化**：桌面操作、浏览器自动化
+- 🤖 **AI增强**：OCR、大模型集成
 
-### ✨ 核心特性
+## ✨ 核心特性
 
-- 🚀 **更易使用**：Python语言，比Go CLI更易上手
-- 🤖 **AI集成**：原生支持Claude、GPT、本地LLM
-- 📊 **多维表格增强**：批量导入导出、智能数据清洗、自动化工作流
-- 🔄 **工作流引擎**：可视化流程设计、条件触发、任务编排
-- 📈 **数据可视化**：一键生成仪表盘、实时数据同步、交互式图表
-- 💡 **智能助手**：自然语言查询、智能推荐、数据洞察
+- 🚀 **低代码开发**：YAML定义流程，无需编程
+- 🤖 **全生态覆盖**：飞书、微信、抖音、小红书一键操作
+- 📊 **智能自动化**：定时任务、事件触发、AI增强
+- 🔄 **多端使用**：CLI命令行、PC客户端、Web控制台
+- 💡 **开箱即用**：内置10+常用模板，复制即用
 
 ---
 
@@ -199,8 +203,8 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/LX1309244704/feishu-py-tools.git
-cd feishu-py-tools
+git clone https://github.com/LX1309244704/weiyuan.git
+cd weiyuan
 
 # 安装依赖
 pip install -r requirements.txt
@@ -287,7 +291,7 @@ print(data)
 ## 📚 项目结构
 
 ```
-feishu-py-tools/
+weiyuan/
 ├── README.md                    # 项目说明
 ├── requirements.txt             # 依赖文件
 ├── setup.py                     # 安装脚本
@@ -426,7 +430,7 @@ print(recommendations)
 
 ### 相比飞书官方CLI的优势
 
-| 特性 | 飞书官方CLI | FeiShu-Py-Tools |
+| 特性 | 飞书官方CLI | Weiyuan |
 |------|-------------|-----------------|
 | 语言 | Go | Python |
 | 学习曲线 | 中 | 低 |

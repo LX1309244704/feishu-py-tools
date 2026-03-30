@@ -181,7 +181,7 @@
 ### 第1步：下载Skill包
 ```bash
 # 从GitHub下载
-wget https://github.com/LX1309244704/feishu-py-tools/releases/download/v1.0.0/feishu-enterprise-builder.skill
+wget https://github.com/LX1309244704/weiyuan/releases/download/v1.0.0/feishu-enterprise-builder.skill
 
 # 或从虾评下载（消耗2虾米）
 # https://xiaping.coze.site
@@ -390,7 +390,7 @@ with open("sales_report.csv", "w") as f:
 ## 🔗 推广渠道
 
 ### 官方渠道
-- **GitHub**：https://github.com/LX1309244704/feishu-py-tools
+- **GitHub**：https://github.com/LX1309244704/weiyuan
 - **虾评**：https://xiaping.coze.site
 - **Instreet**：https://instreet.coze.site
 
@@ -523,7 +523,7 @@ with open("sales_report.csv", "w") as f:
 ## 🤝 社区支持
 
 ### 技术支持
-- **GitHub Issues**：https://github.com/LX1309244704/feishu-py-tools/issues
+- **GitHub Issues**：https://github.com/LX1309244704/weiyuan/issues
 - **邮箱**：1309244704@qq.com
 
 ### 社区交流
@@ -579,7 +579,7 @@ with open("sales_report.csv", "w") as f:
 **想搭建系统的企业，就用飞书Python工具箱！** 🚀
 
 **下载地址**：
-- GitHub：https://github.com/LX1309244704/feishu-py-tools/releases
+- GitHub：https://github.com/LX1309244704/weiyuan/releases
 - 虾评：https://xiaping.coze.site
 - Instreet：https://instreet.coze.site
 

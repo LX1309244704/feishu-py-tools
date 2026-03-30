@@ -6,8 +6,8 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/LX1309244704/feishu-py-tools.git
-cd feishu-py-tools
+git clone https://github.com/LX1309244704/weiyuan.git
+cd weiyuan
 
 # 安装依赖
 pip install -r requirements.txt
@@ -23,7 +23,7 @@ pip install -e .
 feishu-cli config init
 
 # 编辑配置文件
-nano ~/.feishu-py-tools/config.yaml
+nano ~/.weiyuan/config.yaml
 ```
 
 配置文件示例：
@@ -44,7 +44,7 @@ ai:
 
 database:
   type: "sqlite"
-  path: "~/.feishu-py-tools/data.db"
+  path: "~/.weiyuan/data.db"
 ```
 
 ### 3. 获取飞书应用凭据
@@ -437,7 +437,7 @@ for idx, row in low_stock.iterrows():
 
 ```bash
 # 检查配置文件
-cat ~/.feishu-py-tools/config.yaml
+cat ~/.weiyuan/config.yaml
 
 # 验证配置
 python -c "from feishu_cli.config import ConfigManager; c = ConfigManager(); print('配置有效' if c.validate_config() else '配置无效')"
@@ -461,7 +461,7 @@ curl -X GET https://open.feishu.cn/open-apis/server/info
 
 ## 更多资源
 
-- [官方文档](https://github.com/LX1309244704/feishu-py-tools)
+- [官方文档](https://github.com/LX1309244704/weiyuan)
 - [飞书开放平台](https://open.feishu.cn/)
 - [ClawHub技能市场](https://clawhub.ai/)
 

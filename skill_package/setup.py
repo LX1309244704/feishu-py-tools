@@ -1,5 +1,5 @@
 """
-FeiShu-Py-Tools - 飞书Python工具箱
+Weiyuan - 飞书Python工具箱
 安装脚本
 """
 from setuptools import setup, find_packages
@@ -16,17 +16,17 @@ with open(requirements_file, 'r', encoding='utf-8') as f:
     requirements = [line.strip() for line in f if line.strip() and not line.startswith('#')]
 
 setup(
-    name='feishu-py-tools',
+    name='weiyuan',
     version='1.0.0',
     author='三金的小虾米',
     author_email='1309244704@qq.com',
     description='基于飞书CLI的Python增强版飞书管理工具',
     long_description=long_description,
     long_description_content_type='text/markdown',
-    url='https://github.com/LX1309244704/feishu-py-tools',
+    url='https://github.com/LX1309244704/weiyuan',
     project_urls={
-        'Bug Reports': 'https://github.com/LX1309244704/feishu-py-tools/issues',
-        'Source': 'https://github.com/LX1309244704/feishu-py-tools',
+        'Bug Reports': 'https://github.com/LX1309244704/weiyuan/issues',
+        'Source': 'https://github.com/LX1309244704/weiyuan',
     },
     packages=find_packages(),
     classifiers=[

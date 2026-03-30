@@ -518,7 +518,7 @@ async def main(args: Args) -> Output:
 - **扣子官网**：https://www.coze.cn
 - **扣子编程**：https://code.coze.cn
 - **扣子文档**：https://www.coze.cn/docs
-- **你的GitHub**：https://github.com/LX1309244704/feishu-py-tools
+- **你的GitHub**：https://github.com/LX1309244704/weiyuan
 
 ---
 

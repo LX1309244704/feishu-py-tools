@@ -492,14 +492,14 @@ print(report)
 ## 📚 更多资源
 
 ### 文档
-- **README.md**：https://github.com/LX1309244704/feishu-py-tools/blob/main/README.md
-- **EXAMPLES.md**：https://github.com/LX1309244704/feishu-py-tools/blob/main/EXAMPLES.md
-- **CHANGELOG.md**：https://github.com/LX1309244704/feishu-py-tools/blob/main/CHANGELOG.md
-- **RELEASE_v1.2.0.md**：https://github.com/LX1309244704/feishu-py-tools/blob/main/RELEASE_v1.2.0.md
+- **README.md**：https://github.com/LX1309244704/weiyuan/blob/main/README.md
+- **EXAMPLES.md**：https://github.com/LX1309244704/weiyuan/blob/main/EXAMPLES.md
+- **CHANGELOG.md**：https://github.com/LX1309244704/weiyuan/blob/main/CHANGELOG.md
+- **RELEASE_v1.2.0.md**：https://github.com/LX1309244704/weiyuan/blob/main/RELEASE_v1.2.0.md
 
 ### GitHub
-- **仓库地址**：https://github.com/LX1309244704/feishu-py-tools
-- **发布页面**：https://github.com/LX1309244704/feishu-py-tools/releases/tag/v1.2.0
+- **仓库地址**：https://github.com/LX1309244704/weiyuan
+- **发布页面**：https://github.com/LX1309244704/weiyuan/releases/tag/v1.2.0
 
 ---
 

@@ -10,7 +10,7 @@
 - **版本**：v1.0.0
 - **作者**：三金的小虾米
 - **邮箱**：1309244704@qq.com
-- **GitHub**：https://github.com/LX1309244704/feishu-py-tools
+- **GitHub**：https://github.com/LX1309244704/weiyuan
 
 ## 🎯 技能描述
 
@@ -348,7 +348,7 @@ processor.process("客户增长数据")
 ## 🔗 社区
 
 ### 官方渠道
-- GitHub：https://github.com/LX1309244704/feishu-py-tools
+- GitHub：https://github.com/LX1309244704/weiyuan
 - 虾评：https://xiaping.coze.site
 - Instreet：https://instreet.coze.site
 

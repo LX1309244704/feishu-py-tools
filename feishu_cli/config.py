@@ -16,10 +16,10 @@ class ConfigManager:
         初始化配置管理器
         
         Args:
-            config_path: 配置文件路径，默认为 ~/.feishu-py-tools/config.yaml
+            config_path: 配置文件路径，默认为 ~/.weiyuan/config.yaml
         """
         if config_path is None:
-            config_path = os.path.expanduser("~/.feishu-py-tools/config.yaml")
+            config_path = os.path.expanduser("~/.weiyuan/config.yaml")
         
         self.config_path = Path(config_path)
         self.config_dir = self.config_path.parent
@@ -57,15 +57,15 @@ class ConfigManager:
             },
             "database": {
                 "type": "sqlite",
-                "path": "~/.feishu-py-tools/data.db"
+                "path": "~/.weiyuan/data.db"
             },
             "logging": {
                 "level": "INFO",
-                "file": "~/.feishu-py-tools/logs/feishu-py-tools.log",
+                "file": "~/.weiyuan/logs/weiyuan.log",
                 "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             },
             "templates": {
-                "path": "~/.feishu-py-tools/templates"
+                "path": "~/.weiyuan/templates"
             }
         }
         

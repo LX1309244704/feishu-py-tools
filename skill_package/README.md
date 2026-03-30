@@ -1,4 +1,4 @@
-# FeiShu-Py-Tools - 飞书Python工具箱
+# Weiyuan - 飞书Python工具箱
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
@@ -8,7 +8,7 @@
 
 ## 🌟 项目简介
 
-**FeiShu-Py-Tools**是一个功能强大的飞书Python工具箱，在飞书官方CLI基础上，增强了多维表格自动化、AI集成、工作流自动化和数据可视化能力。
+**Weiyuan**是一个功能强大的飞书Python工具箱，在飞书官方CLI基础上，增强了多维表格自动化、AI集成、工作流自动化和数据可视化能力。
 
 ### ✨ 核心特性
 
@@ -91,8 +91,8 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/LX1309244704/feishu-py-tools.git
-cd feishu-py-tools
+git clone https://github.com/LX1309244704/weiyuan.git
+cd weiyuan
 
 # 安装依赖
 pip install -r requirements.txt
@@ -179,7 +179,7 @@ print(data)
 ## 📚 项目结构
 
 ```
-feishu-py-tools/
+weiyuan/
 ├── README.md                    # 项目说明
 ├── requirements.txt             # 依赖文件
 ├── setup.py                     # 安装脚本
@@ -318,7 +318,7 @@ print(recommendations)
 
 ### 相比飞书官方CLI的优势
 
-| 特性 | 飞书官方CLI | FeiShu-Py-Tools |
+| 特性 | 飞书官方CLI | Weiyuan |
 |------|-------------|-----------------|
 | 语言 | Go | Python |
 | 学习曲线 | 中 | 低 |

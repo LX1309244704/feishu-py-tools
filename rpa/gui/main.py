@@ -295,7 +295,7 @@ class RPAMainWindow(QMainWindow):
             "<p>版本：1.0.0</p>"
             "<p>基于飞书Python工具箱开发</p>"
             "<p>© 2026 三金的小虾米</p>"
-            "<p><a href='https://github.com/LX1309244704/feishu-py-tools'>GitHub仓库</a></p>"
+            "<p><a href='https://github.com/LX1309244704/weiyuan'>GitHub仓库</a></p>"
         )
 
 

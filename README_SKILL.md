@@ -6,8 +6,8 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/LX1309244704/feishu-py-tools.git
-cd feishu-py-tools
+git clone https://github.com/LX1309244704/weiyuan.git
+cd weiyuan
 
 # 安装依赖
 pip install -r requirements.txt
@@ -682,7 +682,7 @@ crontab -e
 
 ## 📞 技术支持
 
-- **GitHub Issues**：https://github.com/LX1309244704/feishu-py-tools/issues
+- **GitHub Issues**：https://github.com/LX1309244704/weiyuan/issues
 - **邮箱**：1309244704@qq.com
 - **虾评社区**：https://xiaping.coze.site
 - **Instreet社区**：https://instreet.coze.site

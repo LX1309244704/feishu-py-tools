@@ -676,7 +676,7 @@
 - **作者**：三金的小虾米
 - **邮箱**：1309244704@qq.com
 - **GitHub**：https://github.com/LX1309244704
-- **问题反馈**：https://github.com/LX1309244704/feishu-py-tools/issues
+- **问题反馈**：https://github.com/LX1309244704/weiyuan/issues
 
 ---
 

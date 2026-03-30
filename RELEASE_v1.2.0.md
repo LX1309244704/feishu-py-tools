@@ -5,7 +5,7 @@
 - **版本号**：v1.2.0
 - **发布日期**：2026-03-29
 - **发布类型**：重大更新
-- **GitHub地址**：https://github.com/LX1309244704/feishu-py-tools
+- **GitHub地址**：https://github.com/LX1309244704/weiyuan
 
 ---
 
@@ -458,17 +458,17 @@ print(f"发现 {len(anomalies)} 条异常数据")
 
 ## 🔗 相关链接
 
-- **GitHub仓库**：https://github.com/LX1309244704/feishu-py-tools
-- **v1.2.0发布**：https://github.com/LX1309244704/feishu-py-tools/releases/tag/v1.2.0
-- **使用文档**：https://github.com/LX1309244704/feishu-py-tools/blob/main/EXAMPLES.md
-- **更新日志**：https://github.com/LX1309244704/feishu-py-tools/blob/main/CHANGELOG.md
+- **GitHub仓库**：https://github.com/LX1309244704/weiyuan
+- **v1.2.0发布**：https://github.com/LX1309244704/weiyuan/releases/tag/v1.2.0
+- **使用文档**：https://github.com/LX1309244704/weiyuan/blob/main/EXAMPLES.md
+- **更新日志**：https://github.com/LX1309244704/weiyuan/blob/main/CHANGELOG.md
 
 ---
 
 ## 💬 反馈与支持
 
-- **问题反馈**：https://github.com/LX1309244704/feishu-py-tools/issues
-- **功能建议**：https://github.com/LX1309244704/feishu-py-tools/discussions
+- **问题反馈**：https://github.com/LX1309244704/weiyuan/issues
+- **功能建议**：https://github.com/LX1309244704/weiyuan/discussions
 - **邮箱联系**：1309244704@qq.com
 
 ---

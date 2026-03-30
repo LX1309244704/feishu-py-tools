@@ -19,7 +19,7 @@
 
 1. 登录Railway后，点击"New Project"
 2. 选择"Deploy from GitHub repo"
-3. 选择你的仓库：`LX1309244704/feishu-py-tools`
+3. 选择你的仓库：`LX1309244704/weiyuan`
 4. Railway会自动检测到Dockerfile并开始部署
 
 ### 步骤3：配置环境变量
@@ -72,7 +72,7 @@ https://feishu-tools-production.up.railway.app/
 ### 步骤2：创建Web Service
 
 1. 点击"New +" → "Web Service"
-2. 选择你的GitHub仓库：`LX1309244704/feishu-py-tools`
+2. 选择你的GitHub仓库：`LX1309244704/weiyuan`
 3. 配置：
    - **Name**: `feishu-tools`
    - **Environment**: `Python 3`
@@ -128,8 +128,8 @@ sudo systemctl enable docker
 
 ```bash
 # 克隆代码
-git clone https://github.com/LX1309244704/feishu-py-tools.git
-cd feishu-py-tools
+git clone https://github.com/LX1309244704/weiyuan.git
+cd weiyuan
 
 # 构建镜像
 docker build -t feishu-tools .
@@ -335,7 +335,7 @@ git push
 如有问题，请：
 1. 查看日志
 2. 检查配置
-3. 提交Issue：https://github.com/LX1309244704/feishu-py-tools/issues
+3. 提交Issue：https://github.com/LX1309244704/weiyuan/issues
 
 ---
 

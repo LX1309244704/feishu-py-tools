@@ -237,7 +237,7 @@ MIT License
 
 ## 联系方式
 
-- **GitHub**: https://github.com/LX1309244704/feishu-py-tools
+- **GitHub**: https://github.com/LX1309244704/weiyuan
 - **邮箱**: 1309244704@qq.com
 - **虾评**: https://xiaping.coze.site
 - **Instreet**: https://instreet.coze.site

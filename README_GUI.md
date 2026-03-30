@@ -148,4 +148,4 @@ A: 修改build_gui.sh中的--icon参数，指定你的ico图标路径即可。
 
 ---
 
-**需要帮助请提交Issue到GitHub仓库：https://github.com/LX1309244704/feishu-py-tools**
+**需要帮助请提交Issue到GitHub仓库：https://github.com/LX1309244704/weiyuan**

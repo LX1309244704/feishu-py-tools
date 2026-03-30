@@ -1,4 +1,4 @@
-# 🎉 FeiShu-Py-Tools v2.0.0 发布说明
+# 🎉 Weiyuan v2.0.0 发布说明
 
 ## 📅 发布日期
 2026-03-30
@@ -551,9 +551,9 @@ python -c "from plugins.plugin_system import PluginManager; print('插件系统�
 
 ## 🔗 相关链接
 
-- GitHub仓库：https://github.com/LX1309244704/feishu-py-tools
-- 问题反馈：https://github.com/LX1309244704/feishu-py-tools/issues
-- 功能请求：https://github.com/LX1309244704/feishu-py-tools/issues
+- GitHub仓库：https://github.com/LX1309244704/weiyuan
+- 问题反馈：https://github.com/LX1309244704/weiyuan/issues
+- 功能请求：https://github.com/LX1309244704/weiyuan/issues
 
 ---
 

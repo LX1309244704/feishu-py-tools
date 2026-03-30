@@ -94,7 +94,7 @@ if __name__ == '__main__':
 # 导出工作流
 def export_workflow(workflow, filename="daily_sales_report.json"):
     """导出工作流"""
-    file_path = f"/workspace/projects/workspace/feishu-py-tools/workflows/examples/{filename}"
+    file_path = f"/workspace/projects/workspace/weiyuan/workflows/examples/{filename}"
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(workflow, f, ensure_ascii=False, indent=2)
     print(f"工作流已导出到: {file_path}")

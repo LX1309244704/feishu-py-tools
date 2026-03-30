@@ -34,7 +34,7 @@ class Plugin(ABC):
         self.hooks = {}
         self.dependencies = []
         self.metadata = {}
-        self.install_path = Path.home() / ".feishu-py-tools/plugins" / f"{plugin_id}.json"
+        self.install_path = Path.home() / ".weiyuan/plugins" / f"{plugin_id}.json"
         
         self._load_metadata()
     
@@ -169,7 +169,7 @@ class PluginManager:
         Args:
             plugins_dir: 插件目录
         """
-        self.plugins_dir = Path(plugins_dir) or Path.home() / ".feishu-py-tools/plugins"
+        self.plugins_dir = Path(plugins_dir) or Path.home() / ".weiyuan/plugins"
         self.plugins_dir = self.plugins_dir
         self.plugins = {}
         self.plugins_cache = {}

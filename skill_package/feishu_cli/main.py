@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-FeiShu-Py-Tools CLI 主入口
+Weiyuan CLI 主入口
 """
 import sys
 import click
