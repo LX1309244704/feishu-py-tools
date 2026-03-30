@@ -1,13 +1,14 @@
 """
-设置页面
+设置页面 - 使用配置对话框
 """
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QFormLayout, QLineEdit,
-    QPushButton, QGroupBox, QCheckBox, QComboBox,
-    QFileDialog, QMessageBox, QHBoxLayout, QLabel
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+    QLabel, QGroupBox, QFormLayout, QTextEdit
 )
-from PySide6.QtCore import QSettings
-from PySide6.QtGui import QIcon
+from PySide6.QtCore import Qt
+
+from ..utils.config_dialog import ConfigDialog
+from ..utils.config_manager import get_config
 
 
 class SettingsPage(QWidget):
@@ -15,9 +16,8 @@ class SettingsPage(QWidget):
     
     def __init__(self):
         super().__init__()
-        self.settings = QSettings("FeishuTools", "RPA Client")
+        self.config = get_config()
         self._init_ui()
-        self._load_settings()
     
     def _init_ui(self):
         """初始化界面"""
@@ -26,167 +26,122 @@ class SettingsPage(QWidget):
         main_layout.setSpacing(20)
         
         # 标题
-        title_label = QLabel("<h2>⚙️ 系统设置</h2>")
-        main_layout.addWidget(title_label)
+        title = QLabel("<h2>⚙️ 系统设置</h2>")
+        main_layout.addWidget(title)
         
-        # 飞书配置
-        feishu_group = QGroupBox("飞书应用配置")
-        feishu_layout = QFormLayout(feishu_group)
+        # 快速配置按钮区域
+        config_group = QGroupBox("快速配置")
+        config_layout = QVBoxLayout(config_group)
         
-        self.app_id_input = QLineEdit()
-        self.app_id_input.setPlaceholderText("cli_xxxxxx")
-        self.app_secret_input = QLineEdit()
-        self.app_secret_input.setPlaceholderText("xxxxxx")
-        self.app_secret_input.setEchoMode(QLineEdit.Password)
+        config_hint = QLabel("点击下方按钮打开配置管理器，配置所有平台参数：")
+        config_hint.setStyleSheet("color: #666;")
+        config_layout.addWidget(config_hint)
         
-        feishu_layout.addRow("App ID：", self.app_id_input)
-        feishu_layout.addRow("App Secret：", self.app_secret_input)
-        
-        main_layout.addWidget(feishu_group)
-        
-        # 通用配置
-        general_group = QGroupBox("通用设置")
-        general_layout = QFormLayout(general_group)
-        
-        self.theme_combo = QComboBox()
-        self.theme_combo.addItems(["自动", "亮色主题", "深色主题"])
-        
-        self.lang_combo = QComboBox()
-        self.lang_combo.addItems(["简体中文", "English"])
-        
-        self.startup_check = QCheckBox("开机自动启动")
-        self.minimize_check = QCheckBox("启动时最小化到托盘")
-        self.auto_save_check = QCheckBox("自动保存编辑的流程")
-        
-        general_layout.addRow("主题：", self.theme_combo)
-        general_layout.addRow("语言：", self.lang_combo)
-        general_layout.addRow(self.startup_check)
-        general_layout.addRow(self.minimize_check)
-        general_layout.addRow(self.auto_save_check)
-        
-        main_layout.addWidget(general_group)
-        
-        # 路径配置
-        path_group = QGroupBox("路径配置")
-        path_layout = QFormLayout(path_group)
-        
-        self.flow_path_input = QLineEdit()
-        self.flow_path_browse_btn = QPushButton("浏览")
-        self.flow_path_browse_btn.clicked.connect(self._browse_flow_path)
-        flow_path_layout = QHBoxLayout()
-        flow_path_layout.addWidget(self.flow_path_input)
-        flow_path_layout.addWidget(self.flow_path_browse_btn)
-        
-        self.log_path_input = QLineEdit()
-        self.log_path_browse_btn = QPushButton("浏览")
-        self.log_path_browse_btn.clicked.connect(self._browse_log_path)
-        log_path_layout = QHBoxLayout()
-        log_path_layout.addWidget(self.log_path_input)
-        log_path_layout.addWidget(self.log_path_browse_btn)
-        
-        path_layout.addRow("流程默认保存路径：", flow_path_layout)
-        path_layout.addRow("日志保存路径：", log_path_layout)
-        
-        main_layout.addWidget(path_group)
-        
-        # 保存按钮
-        btn_layout = QHBoxLayout()
-        self.save_btn = QPushButton(QIcon(":/icons/save.png"), "保存设置")
-        self.save_btn.setStyleSheet("""
+        # 打开配置按钮
+        self.open_config_btn = QPushButton("🔧 打开配置管理器")
+        self.open_config_btn.setStyleSheet("""
             QPushButton {
-                background-color: #2ecc71;
+                background-color: #3498db;
                 color: white;
                 border: none;
                 border-radius: 8px;
-                padding: 10px 20px;
-                font-size: 14px;
+                padding: 15px 30px;
+                font-size: 16px;
                 font-weight: bold;
             }
             QPushButton:hover {
-                background-color: #27ae60;
+                background-color: #2980b9;
             }
         """)
-        self.save_btn.clicked.connect(self._save_settings)
+        self.open_config_btn.clicked.connect(self._open_config_dialog)
+        config_layout.addWidget(self.open_config_btn)
         
-        self.reset_btn = QPushButton("恢复默认")
-        self.reset_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #e74c3c;
-                color: white;
-                border: none;
+        # 配置状态概览
+        status_label = QLabel("当前配置状态：")
+        status_label.setStyleSheet("margin-top: 10px; font-weight: bold;")
+        config_layout.addWidget(status_label)
+        
+        self.status_text = QTextEdit()
+        self.status_text.setReadOnly(True)
+        self.status_text.setMaximumHeight(150)
+        self.status_text.setStyleSheet("""
+            QTextEdit {
+                border: 1px solid #ddd;
                 border-radius: 8px;
-                padding: 10px 20px;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background-color: #c0392b;
+                padding: 10px;
+                background-color: #f8f9fa;
             }
         """)
-        self.reset_btn.clicked.connect(self._reset_settings)
+        config_layout.addWidget(self.status_text)
         
-        btn_layout.addStretch()
-        btn_layout.addWidget(self.save_btn)
-        btn_layout.addWidget(self.reset_btn)
-        main_layout.addLayout(btn_layout)
+        main_layout.addWidget(config_group)
+        
+        # 项目信息
+        info_group = QGroupBox("关于微元Weiyuan")
+        info_layout = QFormLayout(info_group)
+        
+        info_layout.addRow("版本:", QLabel("2.0.0"))
+        info_layout.addRow("开发团队:", QLabel("三金的小虾米"))
+        info_layout.addRow("邮箱:", QLabel("1309244704@qq.com"))
+        
+        github_link = QLabel("<a href='https://github.com/LX1309244704/weiyuan'>GitHub仓库</a>")
+        github_link.setOpenExternalLinks(True)
+        info_layout.addRow("项目主页:", github_link)
+        
+        main_layout.addWidget(info_group)
+        
+        # 功能列表
+        features_group = QGroupBox("已集成功能")
+        features_layout = QVBoxLayout(features_group)
+        
+        features_text = """
+        ✅ 飞书生态：多维表格、消息、文档
+        ✅ 微信全生态：个人微信、企业微信、公众号
+        ✅ 内容平台：小红书、抖音、视频号自动发布
+        ✅ UI自动化：桌面操作、浏览器自动化
+        ✅ AI增强：OCR识别、大模型集成
+        ✅ 多种使用方式：CLI、PC客户端、Web控制台
+        """
+        features_label = QLabel(features_text)
+        features_label.setStyleSheet("line-height: 1.8;")
+        features_layout.addWidget(features_label)
+        
+        main_layout.addWidget(features_group)
         
         main_layout.addStretch()
+        
+        # 加载配置状态
+        self._load_config_status()
     
-    def _load_settings(self):
-        """加载设置"""
-        self.app_id_input.setText(self.settings.value("feishu/app_id", ""))
-        self.app_secret_input.setText(self.settings.value("feishu/app_secret", ""))
-        
-        theme_index = self.settings.value("general/theme", 0)
-        self.theme_combo.setCurrentIndex(int(theme_index))
-        
-        lang_index = self.settings.value("general/language", 0)
-        self.lang_combo.setCurrentIndex(int(lang_index))
-        
-        self.startup_check.setChecked(self.settings.value("general/startup", False, type=bool))
-        self.minimize_check.setChecked(self.settings.value("general/minimize", False, type=bool))
-        self.auto_save_check.setChecked(self.settings.value("general/auto_save", True, type=bool))
-        
-        self.flow_path_input.setText(self.settings.value("path/flows", ""))
-        self.log_path_input.setText(self.settings.value("path/logs", ""))
+    def _open_config_dialog(self):
+        """打开配置对话框"""
+        dialog = ConfigDialog(self)
+        dialog.exec()
+        # 对话框关闭后刷新状态
+        self._load_config_status()
     
-    def _save_settings(self):
-        """保存设置"""
-        self.settings.setValue("feishu/app_id", self.app_id_input.text())
-        self.settings.setValue("feishu/app_secret", self.app_secret_input.text())
+    def _load_config_status(self):
+        """加载配置状态"""
+        status = []
         
-        self.settings.setValue("general/theme", self.theme_combo.currentIndex())
-        self.settings.setValue("general/language", self.lang_combo.currentIndex())
-        self.settings.setValue("general/startup", self.startup_check.isChecked())
-        self.settings.setValue("general/minimize", self.minimize_check.isChecked())
-        self.settings.setValue("general/auto_save", self.auto_save_check.isChecked())
+        # 飞书
+        feishu_app_id = self.config.get('feishu', 'app_id', '')
+        status.append(f"飞书配置：{'✅ 已配置' if feishu_app_id else '❌ 未配置'}")
         
-        self.settings.setValue("path/flows", self.flow_path_input.text())
-        self.settings.setValue("path/logs", self.log_path_input.text())
+        # 企业微信
+        work_corp_id = self.config.get('wechat_work', 'corp_id', '')
+        status.append(f"企业微信配置：{'✅ 已配置' if work_corp_id else '❌ 未配置'}")
         
-        self.settings.sync()
-        QMessageBox.information(self, "保存成功", "设置已保存，部分设置需要重启生效！")
-    
-    def _reset_settings(self):
-        """恢复默认设置"""
-        reply = QMessageBox.question(
-            self, "确认恢复", "确定要恢复所有设置为默认值吗？",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
+        # 公众号
+        mp_app_id = self.config.get('wechat_mp', 'app_id', '')
+        status.append(f"公众号配置：{'✅ 已配置' if mp_app_id else '❌ 未配置'}")
         
-        if reply == QMessageBox.Yes:
-            self.settings.clear()
-            self._load_settings()
-            QMessageBox.information(self, "恢复成功", "设置已恢复为默认值！")
-    
-    def _browse_flow_path(self):
-        """浏览流程路径"""
-        path = QFileDialog.getExistingDirectory(self, "选择流程保存路径")
-        if path:
-            self.flow_path_input.setText(path)
-    
-    def _browse_log_path(self):
-        """浏览日志路径"""
-        path = QFileDialog.getExistingDirectory(self, "选择日志保存路径")
-        if path:
-            self.log_path_input.setText(path)
+        # AI
+        ai_configured = any([
+            self.config.get('ai', 'openai_api_key', ''),
+            self.config.get('ai', 'anthropic_api_key', ''),
+            self.config.get('ai', 'dashscope_api_key', '')
+        ])
+        status.append(f"AI配置：{'✅ 已配置' if ai_configured else '❌ 未配置'}")
+        
+        self.status_text.setText('\n'.join(status))

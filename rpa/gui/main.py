@@ -21,6 +21,9 @@ from .pages.template_page import TemplatePage
 from .pages.plugin_page import PluginPage
 from .pages.settings_page import SettingsPage
 
+# 导入配置对话框
+from .utils.config_dialog import ConfigDialog
+
 # 导入资源
 from . import resources
 
@@ -158,6 +161,13 @@ class RPAMainWindow(QMainWindow):
         import_template_action.triggered.connect(self._import_template)
         tools_menu.addAction(import_template_action)
         
+        tools_menu.addSeparator()
+        
+        config_action = QAction(get_icon("settings.png"), "配置管理", self)
+        config_action.setShortcut("Ctrl+Shift+C")
+        config_action.triggered.connect(self._open_config_dialog)
+        tools_menu.addAction(config_action)
+        
         # 帮助菜单
         help_menu = menubar.addMenu("帮助")
         
@@ -289,6 +299,12 @@ class RPAMainWindow(QMainWindow):
         """导入模板"""
         self.tab_widget.setCurrentIndex(3)
         self.status_bar.showMessage("切换到模板市场")
+    
+    def _open_config_dialog(self):
+        """打开配置对话框"""
+        dialog = ConfigDialog(self)
+        dialog.exec()
+        self.status_bar.showMessage("配置已更新")
     
     def _open_docs(self):
         """打开文档"""
