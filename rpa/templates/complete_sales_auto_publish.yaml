@@ -1,0 +1,302 @@
+# 📊 完整实战：飞书销售数据 → AI生成文案 → 抖音+微信自动发布
+# 
+# 场景：电商运营每天需要把飞书多维表格的销售数据
+#       自动生成抖音宣传文案并发布，同时发送到企业微信群通知团队
+#
+# 前置准备：
+# 1. 安装官方CLI: npm install -g @larksuite/cli
+# 2. 官方CLI登录: lark-cli auth login --recommend
+# 3. 在微元GUI配置企业微信参数（工具→配置管理）
+# 4. 准备抖音账号cookies（首次运行会提示扫码）
+
+name: 销售数据自动发布到抖音和微信
+description: 每天自动从飞书获取销售数据，AI生成抖音文案，发布到抖音和微信群
+version: 1.0.0
+
+# 每天早上9点自动执行
+trigger:
+  type: schedule
+  cron: "0 9 * * *"
+
+variables:
+  # 飞书多维表格配置（在飞书开放平台获取）
+  feishu_app_token: "AXDyb30BNamJJ6sMYh2cda7Gnxg"  # 替换为你的多维表格token
+  feishu_table_id: "tblWpzyKj1W3juJS"              # 替换为你的表格ID
+  
+  # 企业微信配置（会自动从 ~/.weiyuan/config.json 读取，这里可以覆盖）
+  # work_corp_id: "wwxxxxxx"
+  # work_agent_id: "1000001"
+  
+  # 抖音/小红书配置
+  publish_time: "09:30"  # 定时发布时间
+
+tags:
+  - 每日自动化
+  - 销售数据
+  - 抖音发布
+  - 微信通知
+
+steps:
+  # ═══════════════════════════════════════════════════════
+  # 步骤1：使用官方 CLI 获取今日销售数据
+  # ═══════════════════════════════════════════════════════
+  - name: 📊 从飞书获取今日销售数据
+    uses: lark/cli@1.0.0
+    with:
+      command: api                           # 使用API命令
+      service: base                          # 多维表格服务
+      method: records/search                 # 搜索记录方法
+      params:                                # 请求参数
+        app_token: "${{ globals.feishu_app_token }}"
+        table_id: "${{ globals.feishu_table_id }}"
+        filter: |
+          {
+            "conjunction": "and",
+            "conditions": [
+              {
+                "field_name": "日期",
+                "operator": "is",
+                "value": ["${{ today() }}"]
+              }
+            ]
+          }
+      format: json
+    register: sales_data                     # 保存结果到变量
+    timeout: 30
+    retry: 2                                 # 失败重试2次
+    continue_on_failure: false
+  
+  # ═══════════════════════════════════════════════════════
+  # 步骤2：数据处理 - 计算汇总指标
+  # ═══════════════════════════════════════════════════════
+  - name: 🧮 计算销售汇总数据
+    uses: data/process@1.0.0
+    with:
+      action: aggregate                      # 聚合计算
+      data: "${{ steps.从飞书获取今日销售数据.output.json }}"
+      operations:
+        - type: sum
+          field: 销售额
+          alias: total_sales
+        - type: sum
+          field: 订单数
+          alias: total_orders
+        - type: avg
+          field: 客单价
+          alias: avg_order_value
+        - type: count
+          alias: product_count
+    register: summary
+  
+  # ═══════════════════════════════════════════════════════
+  # 步骤3：AI生成抖音文案
+  # ═══════════════════════════════════════════════════════
+  - name: 🤖 AI生成抖音宣传文案
+    uses: ai/llm@1.0.0
+    with:
+      action: generate                       # 文本生成
+      provider: openai                       # 使用OpenAI（可改为qwen/aliyun）
+      model: gpt-3.5-turbo
+      system_prompt: |
+        你是一位专业的抖音电商文案写手，擅长写吸引人的短视频文案。
+        要求：
+        1. 文案要有吸引力，能引发用户购买欲望
+        2. 适当使用emoji增加趣味性
+        3. 控制在100字以内，适合抖音视频描述
+        4. 带上相关话题标签（#电商 #好物推荐 等）
+        5. 语气亲切、接地气
+      prompt: |
+        请根据以下今日销售数据，写一条抖音宣传文案：
+        
+        📊 今日销售数据：
+        - 总销售额：¥${{ steps.计算销售汇总数据.output.total_sales }}
+        - 订单数：${{ steps.计算销售汇总数据.output.total_orders }}单
+        - 客单价：¥${{ steps.计算销售汇总数据.output.avg_order_value }}
+        - 热销商品数：${{ steps.计算销售汇总数据.output.product_count }}款
+        
+        文案要求：
+        1. 突出今日销售火爆的氛围
+        2. 暗示商品很受欢迎，库存有限
+        3. 引导用户点击链接购买
+    register: douyin_content
+  
+  # ═══════════════════════════════════════════════════════
+  # 步骤4：AI生成小红书文案（另一种风格）
+  # ═══════════════════════════════════════════════════════
+  - name: 🤖 AI生成小红书种草文案
+    uses: ai/llm@1.0.0
+    with:
+      action: generate
+      provider: qwen                          # 使用通义千问
+      model: qwen-plus
+      system_prompt: |
+        你是一位小红书种草博主，擅长写真实、有感染力的好物分享笔记。
+        风格要求：
+        1. 像朋友分享好物一样亲切自然
+        2. 多使用emoji增加可读性
+        3. 分点列出优点
+        4. 结尾引导互动（求点赞收藏）
+        5. 带上相关话题标签
+      prompt: |
+        根据今日销售数据，写一条小红书种草文案：
+        
+        数据：销售额¥${{ steps.计算销售汇总数据.output.total_sales }}，
+              订单${{ steps.计算销售汇总数据.output.total_orders }}单
+        
+        文案要真实、有感染力，像朋友推荐好物。
+    register: xiaohongshu_content
+  
+  # ═══════════════════════════════════════════════════════
+  # 步骤5：生成宣传图片（截图或AI生成）
+  # ═══════════════════════════════════════════════════════
+  - name: 🎨 生成数据可视化图表
+    uses: data/process@1.0.0
+    with:
+      action: create_chart                    # 生成图表
+      type: bar                               # 柱状图
+      data: "${{ steps.从飞书获取今日销售数据.output.json }}"
+      config:
+        title: "今日热销商品TOP10"
+        x_field: 商品名称
+        y_field: 销售额
+        color: "#FF6B6B"
+        output: "./charts/daily_sales_${{ today('%Y%m%d') }}.png"
+    register: chart_image
+  
+  # ═══════════════════════════════════════════════════════
+  # 步骤6：发布到抖音
+  # ═══════════════════════════════════════════════════════
+  - name: 📱 发布到抖音
+    uses: publish/content@1.0.0
+    with:
+      platform: douyin
+      title: "今日销售破纪录！🔥这些好物卖爆了"
+      content: |
+        ${{ steps.AI生成抖音宣传文案.output.content }}
+        
+        📊 今日数据：
+        销售额：¥${{ steps.计算销售汇总数据.output.total_sales }}
+        订单数：${{ steps.计算销售汇总数据.output.total_orders }}单
+        
+        👇 点击主页链接购买
+        #好物推荐 #今日热销 #电商日常 #爆款推荐
+      files:
+        - "./videos/daily_promo.mp4"           # 准备一段通用宣传视频
+        - "${{ steps.生成数据可视化图表.output.file }}"  # 数据图表
+      publish_time: "${{ globals.publish_time }}"  # 定时发布
+      cookies_path: "~/.weiyuan/douyin_cookies.json"
+    timeout: 120
+    retry: 1
+  
+  # ═══════════════════════════════════════════════════════
+  # 步骤7：发布到小红书
+  # ═══════════════════════════════════════════════════════
+  - name: 📱 发布到小红书
+    uses: publish/content@1.0.0
+    with:
+      platform: xiaohongshu
+      title: "姐妹们！今天这些好物卖疯了🔥亲测好用"
+      content: |
+        ${{ steps.AI生成小红书种草文案.output.content }}
+        
+        💰 今日战绩：
+        总销售额突破 ¥${{ steps.计算销售汇总数据.output.total_sales }}
+        感谢每一位支持的姐妹！❤️
+        
+        👆 点击主页查看更多好物
+      files:
+        - "./images/product_showcase.png"      # 商品展示图
+        - "${{ steps.生成数据可视化图表.output.file }}"
+      tags:
+        - 好物推荐
+        - 今日热销
+        - 电商日常
+        - 购物分享
+      cookies_path: "~/.weiyuan/xiaohongshu_cookies.json"
+    timeout: 120
+  
+  # ═══════════════════════════════════════════════════════
+  # 步骤8：发送企业微信通知（Markdown格式）
+  # ═══════════════════════════════════════════════════════
+  - name: 💬 发送企业微信通知
+    uses: wechat/work@1.0.0
+    with:
+      action: send_markdown                   # 发送Markdown消息
+      corp_id: "${{ env.WECHAT_WORK_CORP_ID }}"      # 从环境变量或配置文件读取
+      corp_secret: "${{ env.WECHAT_WORK_CORP_SECRET }}"
+      agent_id: "${{ env.WECHAT_WORK_AGENT_ID }}"
+      receiver: "运营部群"                     # 发送到运营部群
+      content: |
+        ## 📊 每日销售数据日报
+        
+        **日期**：${{ today() }}
+        
+        ### 📈 核心指标
+        | 指标 | 数值 |
+        |------|------|
+        | 总销售额 | **¥${{ steps.计算销售汇总数据.output.total_sales }}** |
+        | 订单数 | **${{ steps.计算销售汇总数据.output.total_orders }}单** |
+        | 客单价 | ¥${{ steps.计算销售汇总数据.output.avg_order_value }} |
+        | 热销商品 | ${{ steps.计算销售汇总数据.output.product_count }}款 |
+        
+        ### 📱 自动化执行结果
+        - ✅ 抖音：已发布（定时 ${{ globals.publish_time }}）
+        - ✅ 小红书：已发布
+        - ✅ 数据图表：已生成
+        
+        ---
+        🤖 由微元RPA自动执行
+        ⏰ 执行时间：${{ now() }}
+    timeout: 30
+
+# ═══════════════════════════════════════════════════════
+# 成功回调 - 发送成功通知
+# ═══════════════════════════════════════════════════════
+on_success:
+  - name: ✅ 发送成功通知
+    uses: wechat/work@1.0.0
+    with:
+      action: send_text
+      receiver: "管理员"
+      content: |
+        ✅ 销售数据自动化流程执行成功！
+        
+        📊 今日销售：¥${{ steps.计算销售汇总数据.output.total_sales }}
+        📱 抖音：已发布
+        📱 小红书：已发布
+        💬 微信群：已通知
+        
+        ⏰ ${{ now() }}
+
+# ═══════════════════════════════════════════════════════
+# 失败回调 - 发送告警通知
+# ═══════════════════════════════════════════════════════
+on_failure:
+  - name: ❌ 发送失败告警
+    uses: wechat/work@1.0.0
+    with:
+      action: send_text
+      receiver: "管理员"
+      content: |
+        🚨 销售数据自动化流程执行失败！
+        
+        ❌ 错误信息：${{ error }}
+        
+        🔍 请检查：
+        1. 飞书官方CLI是否已安装和登录
+        2. 企业微信配置是否正确
+        3. 抖音/小红书cookies是否过期
+        
+        ⏰ ${{ now() }}
+        📋 流程名称：${{ flow.name }}
+
+# ═══════════════════════════════════════════════════════
+# 执行设置
+# ═══════════════════════════════════════════════════════
+settings:
+  log_level: info                           # 日志级别
+  timeout: 600                              # 总超时10分钟
+  max_parallel: 2                           # 最大并行数（抖音和小红书同时发布）
+  notification:
+    on_start: true                          # 开始执行时通知
+    on_complete: true                       # 完成时通知
