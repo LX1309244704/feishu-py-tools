@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPA机器人流程自动化控制台</title>
+    <!-- 引入ElementUI样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入Vue -->
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <!-- 引入ElementUI组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!-- 引入axios -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- 引入CodeMirror编辑器 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/yaml/yaml.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        body, html {
+            height: 100%;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        .app-container {
+            height: 100vh;
+        }
+        .main-content {
+            padding: 20px;
+            background-color: #f5f7fa;
+            min-height: calc(100vh - 60px);
+        }
+        .stat-card {
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+        }
+        .stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .stat-card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .stat-card.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .CodeMirror {
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .logs-area {
+            height: 300px;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, monospace;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="app-container">
+        <el-container style="height: 100%">
+            <!-- 侧边栏 -->
+            <el-aside width="200px" style="background-color: #304156; color: white;">
+                <div style="padding: 20px; text-align: center; font-size: 18px; font-weight: bold; border-bottom: 1px solid #1f2d3d;">
+                    🤖 RPA控制台
+                </div>
+                <el-menu
+                    default-active="dashboard"
+                    background-color="#304156"
+                    text-color="#fff"
+                    active-text-color="#409EFF"
+                    @select="handleMenuSelect"
+                >
+                    <el-menu-item index="dashboard">
+                        <i class="el-icon-data-analysis"></i>
+                        <span slot="title">仪表盘</span>
+                    </el-menu-item>
+                    <el-menu-item index="flows">
+                        <i class="el-icon-document"></i>
+                        <span slot="title">流程管理</span>
+                    </el-menu-item>
+                    <el-menu-item index="executions">
+                        <i class="el-icon-time"></i>
+                        <span slot="title">执行记录</span>
+                    </el-menu-item>
+                    <el-menu-item index="templates">
+                        <i class="el-icon-collection"></i>
+                        <span slot="title">模板市场</span>
+                    </el-menu-item>
+                    <el-menu-item index="plugins">
+                        <i class="el-icon-menu"></i>
+                        <span slot="title">插件中心</span>
+                    </el-menu-item>
+                    <el-menu-item index="settings">
+                        <i class="el-icon-setting"></i>
+                        <span slot="title">系统设置</span>
+                    </el-menu-item>
+                </el-menu>
+            </el-aside>
+
+            <!-- 主内容区 -->
+            <el-container>
+                <el-header style="background-color: white; border-bottom: 1px solid #e6e6e6; display: flex; align-items: center; justify-content: flex-end; padding: 0 20px;">
+                    <el-button type="primary" icon="el-icon-refresh" @click="refreshData" size="small">刷新</el-button>
+                </el-header>
+                <el-main class="main-content">
+                    <!-- 仪表盘页面 -->
+                    <div v-if="activePage === 'dashboard'">
+                        <h2>📊 仪表盘</h2>
+                        <el-row :gutter="20" style="margin: 20px 0;">
+                            <el-col :span="6">
+                                <div class="stat-card blue">
+                                    <div>总流程数</div>
+                                    <div class="stat-number">{{ stats.total_flows }}</div>
+                                    <div style="opacity: 0.8;">个</div>
+                                </div>
+                            </el-col>
+                            <el-col :span="6">
+                                <div class="stat-card green">
+                                    <div>今日执行</div>
+                                    <div class="stat-number">{{ stats.today_executions }}</div>
+                                    <div style="opacity: 0.8;">次</div>
+                                </div>
+                            </el-col>
+                            <el-col :span="6">
+                                <div class="stat-card orange">
+                                    <div>成功率</div>
+                                    <div class="stat-number">{{ stats.success_rate }}</div>
+                                    <div style="opacity: 0.8;">%</div>
+                                </div>
+                            </el-col>
+                            <el-col :span="6">
+                                <div class="stat-card purple">
+                                    <div>平均耗时</div>
+                                    <div class="stat-number">{{ stats.avg_duration }}</div>
+                                    <div style="opacity: 0.8;">秒</div>
+                                </div>
+                            </el-col>
+                        </el-row>
+
+                        <h3 style="margin: 30px 0 15px 0;">最近执行记录</h3>
+                        <el-table :data="recentExecutions" border style="width: 100%">
+                            <el-table-column prop="flow_name" label="流程名称"></el-table-column>
+                            <el-table-column prop="start_time" label="开始时间"></el-table-column>
+                            <el-table-column prop="duration" label="耗时" width="100">
+                                <template slot-scope="scope">
+                                    {{ scope.row.duration ? scope.row.duration.toFixed(2) + 's' : '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="status" label="状态" width="100">
+                                <template slot-scope="scope">
+                                    <el-tag :type="scope.row.status === 'success' ? 'success' : 'danger'">
+                                        {{ scope.row.status === 'success' ? '成功' : '失败' }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+
+                    <!-- 流程管理页面 -->
+                    <div v-if="activePage === 'flows'">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2>📝 流程管理</h2>
+                            <div>
+                                <el-button type="primary" icon="el-icon-plus" @click="openNewFlowDialog">新建流程</el-button>
+                            </div>
+                        </div>
+
+                        <el-table :data="flows" border style="width: 100%">
+                            <el-table-column prop="name" label="流程名称"></el-table-column>
+                            <el-table-column prop="description" label="描述" width="300"></el-table-column>
+                            <el-table-column prop="version" label="版本" width="100"></el-table-column>
+                            <el-table-column prop="modified_time" label="修改时间" width="180"></el-table-column>
+                            <el-table-column label="操作" width="250" fixed="right">
+                                <template slot-scope="scope">
+                                    <el-button size="small" type="primary" @click="editFlow(scope.row)">编辑</el-button>
+                                    <el-button size="small" type="success" @click="runFlow(scope.row)">执行</el-button>
+                                    <el-button size="small" type="danger" @click="deleteFlow(scope.row)">删除</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+
+                        <!-- 编辑流程对话框 -->
+                        <el-dialog :title="editDialogTitle" width="90%" :visible.sync="editDialogVisible" :close-on-click-modal="false">
+                            <el-form :model="currentFlow" label-width="80px">
+                                <el-form-item label="文件名">
+                                    <el-input v-model="currentFlow.file_name" :disabled="!!currentFlow.file_name"></el-input>
+                                </el-form-item>
+                            </el-form>
+                            <textarea id="codeEditor"></textarea>
+                            <div style="margin: 15px 0;">
+                                <el-button type="primary" @click="saveFlow">保存</el-button>
+                                <el-button @click="validateFlow">验证格式</el-button>
+                            </div>
+                            <h3>执行日志</h3>
+                            <div class="logs-area" id="logArea">{{ executionLogs }}</div>
+                        </el-dialog>
+                    </div>
+
+                    <!-- 执行记录页面 -->
+                    <div v-if="activePage === 'executions'">
+                        <h2>⏱️ 执行记录</h2>
+                        <el-table :data="executions" border style="width: 100%; margin: 20px 0;">
+                            <el-table-column prop="flow_name" label="流程名称"></el-table-column>
+                            <el-table-column prop="file_name" label="文件名" width="200"></el-table-column>
+                            <el-table-column prop="start_time" label="开始时间" width="180"></el-table-column>
+                            <el-table-column prop="end_time" label="结束时间" width="180"></el-table-column>
+                            <el-table-column prop="duration" label="耗时" width="100">
+                                <template slot-scope="scope">
+                                    {{ scope.row.duration ? scope.row.duration.toFixed(2) + 's' : '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="status" label="状态" width="100">
+                                <template slot-scope="scope">
+                                    <el-tag :type="scope.row.status === 'success' ? 'success' : 'danger'">
+                                        {{ scope.row.status === 'success' ? '成功' : '失败' }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="error" label="错误信息" width="300" show-overflow-tooltip></el-table-column>
+                        </el-table>
+                    </div>
+
+                    <!-- 模板市场页面 -->
+                    <div v-if="activePage === 'templates'">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2>📦 模板市场</h2>
+                        </div>
+
+                        <el-row :gutter="20">
+                            <el-col :span="8" v-for="template in templates" :key="template.file_name" style="margin-bottom: 20px;">
+                                <el-card shadow="hover">
+                                    <div slot="header" style="font-weight: bold;">{{ template.name }}</div>
+                                    <p>{{ template.description }}</p>
+                                    <p style="color: #999; font-size: 12px; margin: 10px 0;">版本: {{ template.version }}</p>
+                                    <el-button type="primary" size="small" @click="useTemplate(template)">使用模板</el-button>
+                                </el-card>
+                            </el-col>
+                        </el-row>
+                    </div>
+
+                    <!-- 插件中心页面 -->
+                    <div v-if="activePage === 'plugins'">
+                        <h2>🔌 插件中心</h2>
+                        <el-table :data="plugins" border style="width: 100%; margin: 20px 0;">
+                            <el-table-column prop="name" label="插件名称" width="200"></el-table-column>
+                            <el-table-column prop="version" label="版本" width="100"></el-table-column>
+                            <el-table-column prop="description" label="描述"></el-table-column>
+                            <el-table-column prop="author" label="作者" width="150"></el-table-column>
+                        </el-table>
+                    </div>
+
+                    <!-- 设置页面 -->
+                    <div v-if="activePage === 'settings'">
+                        <h2>⚙️ 系统设置</h2>
+                        <el-card style="margin: 20px 0;">
+                            <h3>Web控制台信息</h3>
+                            <p>版本: 1.0.0</p>
+                            <p>开发团队: 三金的小虾米</p>
+                            <p>GitHub仓库: <a href="https://github.com/LX1309244704/feishu-py-tools" target="_blank">feishu-py-tools</a></p>
+                        </el-card>
+                    </div>
+                </el-main>
+            </el-container>
+        </el-container>
+
+        <!-- 新建流程对话框 -->
+        <el-dialog title="新建流程" width="500px" :visible.sync="newFlowDialogVisible">
+            <el-form :model="newFlowForm" label-width="80px">
+                <el-form-item label="流程名称">
+                    <el-input v-model="newFlowForm.name" placeholder="输入流程名称"></el-input>
+                </el-form-item>
+                <el-form-item label="文件名">
+                    <el-input v-model="newFlowForm.file_name" placeholder="例如：库存预警.yaml"></el-input>
+                </el-form-item>
+                <el-form-item label="描述">
+                    <el-input type="textarea" v-model="newFlowForm.description" placeholder="输入流程描述"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="newFlowDialogVisible = false">取消</el-button>
+                <el-button type="primary" @click="createNewFlow">确定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    activePage: 'dashboard',
+                    // 仪表盘数据
+                    stats: {
+                        total_flows: 0,
+                        today_executions: 0,
+                        success_rate: '0%',
+                        avg_duration: '0s'
+                    },
+                    recentExecutions: [],
+                    // 流程列表
+                    flows: [],
+                    // 执行记录
+                    executions: [],
+                    // 模板列表
+                    templates: [],
+                    // 插件列表
+                    plugins: [],
+                    // 编辑对话框
+                    editDialogVisible: false,
+                    editDialogTitle: '编辑流程',
+                    currentFlow: {},
+                    codeEditor: null,
+                    executionLogs: '',
+                    // 新建流程对话框
+                    newFlowDialogVisible: false,
+                    newFlowForm: {
+                        name: '',
+                        file_name: '',
+                        description: ''
+                    }
+                }
+            },
+            mounted() {
+                this.loadDashboardData();
+                // 初始化编辑器
+                setTimeout(() => {
+                    this.initCodeEditor();
+                }, 500);
+            },
+            methods: {
+                handleMenuSelect(index) {
+                    this.activePage = index;
+                    if (index === 'dashboard') {
+                        this.loadDashboardData();
+                    } else if (index === 'flows') {
+                        this.loadFlows();
+                    } else if (index === 'executions') {
+                        this.loadExecutions();
+                    } else if (index === 'templates') {
+                        this.loadTemplates();
+                    } else if (index === 'plugins') {
+                        this.loadPlugins();
+                    }
+                },
+                refreshData() {
+                    this.handleMenuSelect(this.activePage);
+                },
+                // 仪表盘数据
+                async loadDashboardData() {
+                    const res = await axios.get('/api/dashboard/stats');
+                    if (res.data.success) {
+                        this.stats = res.data.data;
+                    }
+                    const execRes = await axios.get('/api/dashboard/recent_executions');
+                    if (execRes.data.success) {
+                        this.recentExecutions = execRes.data.data;
+                    }
+                },
+                // 加载流程列表
+                async loadFlows() {
+                    const res = await axios.get('/api/flows');
+                    if (res.data.success) {
+                        this.flows = res.data.data;
+                    }
+                },
+                // 加载执行记录
+                async loadExecutions() {
+                    const res = await axios.get('/api/executions');
+                    if (res.data.success) {
+                        this.executions = res.data.data;
+                    }
+                },
+                // 加载模板
+                async loadTemplates() {
+                    const res = await axios.get('/api/templates');
+                    if (res.data.success) {
+                        this.templates = res.data.data;
+                    }
+                },
+                // 加载插件
+                async loadPlugins() {
+                    const res = await axios.get('/api/plugins');
+                    if (res.data.success) {
+                        this.plugins = res.data.data;
+                    }
+                },
+                // 新建流程
+                openNewFlowDialog() {
+                    this.newFlowForm = { name: '', file_name: '', description: '' };
+                    this.newFlowDialogVisible = true;
+                },
+                async createNewFlow() {
+                    if (!this.newFlowForm.name || !this.newFlowForm.file_name) {
+                        this.$message.error('请填写完整信息');
+                        return;
+                    }
+                    // 生成默认内容
+                    const defaultContent = `# RPA流程定义
+name: ${this.newFlowForm.name}
+description: "${this.newFlowForm.description}"
+version: 1.0.0
+
+trigger:
+  type: manual
+
+steps:
+  - name: 示例步骤
+    uses: feishu/bitable@1.0.0
+    with:
+      action: list_tables
+      app_token: "xxxxxx"
+`;
+                    // 保存
+                    const res = await axios.post('/api/flow', {
+                        file_name: this.newFlowForm.file_name,
+                        content: defaultContent
+                    });
+                    if (res.data.success) {
+                        this.$message.success('创建成功');
+                        this.newFlowDialogVisible = false;
+                        this.loadFlows();
+                        // 打开编辑
+                        this.currentFlow = {
+                            file_name: this.newFlowForm.file_name,
+                            content: defaultContent
+                        };
+                        this.editDialogTitle = `编辑流程：${this.newFlowForm.name}`;
+                        this.editDialogVisible = true;
+                        setTimeout(() => {
+                            this.codeEditor.setValue(defaultContent);
+                        }, 100);
+                    }
+                },
+                // 编辑流程
+                async editFlow(row) {
+                    this.currentFlow = { ...row };
+                    const res = await axios.get(`/api/flow/${row.file_name}`);
+                    if (res.data.success) {
+                        this.currentFlow.content = res.data.data.content;
+                        this.editDialogTitle = `编辑流程：${row.name}`;
+                        this.editDialogVisible = true;
+                        setTimeout(() => {
+                            this.codeEditor.setValue(res.data.data.content);
+                        }, 100);
+                    }
+                },
+                // 执行流程
+                async runFlow(row) {
+                    const confirm = await this.$confirm('确定要执行该流程吗？', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).catch(() => {});
+                    if (confirm !== 'confirm') return;
+                    
+                    const res = await axios.post('/api/flow/run', {
+                        file_name: row.file_name
+                    });
+                    if (res.data.success) {
+                        this.$message.success('流程已开始执行');
+                        this.executionLogs = '执行中...\n';
+                        // 轮询获取执行结果
+                        const timer = setInterval(async () => {
+                            const execRes = await axios.get('/api/executions');
+                            if (execRes.data.success) {
+                                const latest = execRes.data.data[0];
+                                if (latest && latest.file_name === row.file_name && latest.status) {
+                                    this.executionLogs += `执行完成！状态：${latest.status}\n`;
+                                    if (latest.error) {
+                                        this.executionLogs += `错误：${latest.error}\n`;
+                                    }
+                                    clearInterval(timer);
+                                    this.loadDashboardData();
+                                    this.loadExecutions();
+                                }
+                            }
+                        }, 1000);
+                    }
+                },
+                // 删除流程
+                async deleteFlow(row) {
+                    const confirm = await this.$confirm('确定要删除该流程吗？', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).catch(() => {});
+                    if (confirm !== 'confirm') return;
+                    
+                    const res = await axios.post('/api/flow/delete', {
+                        file_name: row.file_name
+                    });
+                    if (res.data.success) {
+                        this.$message.success('删除成功');
+                        this.loadFlows();
+                    }
+                },
+                // 保存流程
+                async saveFlow() {
+                    const content = this.codeEditor.getValue();
+                    const res = await axios.post('/api/flow', {
+                        file_name: this.currentFlow.file_name,
+                        content: content
+                    });
+                    if (res.data.success) {
+                        this.$message.success('保存成功');
+                        this.loadFlows();
+                    }
+                },
+                // 验证流程
+                async validateFlow() {
+                    const content = this.codeEditor.getValue();
+                    const res = await axios.post('/api/validate', { content: content });
+                    if (res.data.success) {
+                        this.$message.success('格式验证通过');
+                    } else {
+                        this.$message.error('验证失败：' + res.data.error);
+                    }
+                },
+                // 使用模板
+                useTemplate(template) {
+                    this.currentFlow = {
+                        file_name: template.file_name,
+                        content: template.content
+                    };
+                    this.editDialogTitle = `使用模板：${template.name}`;
+                    this.editDialogVisible = true;
+                    setTimeout(() => {
+                        this.codeEditor.setValue(template.content);
+                    }, 100);
+                },
+                // 初始化代码编辑器
+                initCodeEditor() {
+                    this.codeEditor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+                        mode: 'yaml',
+                        theme: 'monokai',
+                        lineNumbers: true,
+                        indentUnit: 2,
+                        tabSize: 2,
+                        lineWrapping: true
+                    });
+                }
+            }
+        })
+    </script>
+</body>
+</html>

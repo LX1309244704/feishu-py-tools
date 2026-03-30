@@ -25,3 +25,24 @@ concurrent-futures>=3.1.1
 # 微信插件
 itchat-uos>=1.5.0.dev0  # 支持最新微信版本
 Pillow>=9.0.0  # 显示登录二维码
+
+# UI自动化
+pyautogui>=0.9.54  # 桌面UI自动化
+selenium>=4.10.0   # 浏览器自动化
+webdriver-manager>=4.0.0  # 自动管理浏览器驱动
+opencv-python>=4.8.0  # 图像识别
+
+# OCR
+paddleocr>=2.7.0  # 百度飞桨OCR
+paddlepaddle>=2.5.0  # PaddlePaddle框架
+
+# AI增强
+openai>=1.0.0  # OpenAI API
+anthropic>=0.18.0  # Anthropic Claude API
+dashscope>=1.14.0  # 阿里云通义千问API
+
+# Web控制台
+flask>=2.3.0  # Web后端
+flask-cors>=4.0.0  # 跨域支持
+flask-socketio>=5.3.0  # WebSocket实时推送
+
