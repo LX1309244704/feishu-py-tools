@@ -25,6 +25,8 @@ concurrent-futures>=3.1.1
 # 微信插件
 itchat-uos>=1.5.0.dev0  # 支持最新微信版本
 Pillow>=9.0.0  # 显示登录二维码
+wechatwork>=0.9.0  # 企业微信SDK
+wechatpy>=2.0.0  # 微信公众号SDK
 
 # UI自动化
 pyautogui>=0.9.54  # 桌面UI自动化
