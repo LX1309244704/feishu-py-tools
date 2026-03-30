@@ -1,0 +1,129 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RPA流程定义",
+  "description": "opencli RPA工具的流程定义格式",
+  "type": "object",
+  "required": ["name", "steps"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "流程名称"
+    },
+    "description": {
+      "type": "string",
+      "description": "流程描述"
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0.0",
+      "description": "流程版本"
+    },
+    "trigger": {
+      "type": "object",
+      "description": "触发条件",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["schedule", "webhook", "event", "manual", "condition"],
+          "description": "触发类型"
+        },
+        "cron": {
+          "type": "string",
+          "description": "Cron表达式（schedule类型必填）"
+        },
+        "event": {
+          "type": "string",
+          "description": "事件名称（event类型必填）"
+        },
+        "condition": {
+          "type": "string",
+          "description": "触发条件表达式（condition类型必填）"
+        },
+        "webhook_token": {
+          "type": "string",
+          "description": "Webhook验证Token（webhook类型）"
+        }
+      },
+      "required": ["type"]
+    },
+    "variables": {
+      "type": "object",
+      "description": "全局变量定义",
+      "additionalProperties": true
+    },
+    "steps": {
+      "type": "array",
+      "description": "流程步骤列表",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "uses"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "步骤名称"
+          },
+          "uses": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_]+/[a-zA-Z0-9_]+@[0-9.]+$",
+            "description": "使用的插件，格式：插件名/动作@版本"
+          },
+          "with": {
+            "type": "object",
+            "description": "插件参数"
+          },
+          "if": {
+            "type": "string",
+            "description": "步骤执行条件，表达式为真时执行"
+          },
+          "timeout": {
+            "type": "integer",
+            "default": 300,
+            "description": "步骤超时时间（秒）"
+          },
+          "retry": {
+            "type": "integer",
+            "default": 0,
+            "description": "失败重试次数"
+          },
+          "continue_on_failure": {
+            "type": "boolean",
+            "default": false,
+            "description": "失败时是否继续执行后续步骤"
+          }
+        }
+      }
+    },
+    "on_success": {
+      "type": "array",
+      "description": "流程成功执行后执行的步骤",
+      "items": {"$ref": "#/properties/steps/items"}
+    },
+    "on_failure": {
+      "type": "array",
+      "description": "流程执行失败后执行的步骤",
+      "items": {"$ref": "#/properties/steps/items"}
+    },
+    "settings": {
+      "type": "object",
+      "description": "流程设置",
+      "properties": {
+        "max_parallel": {
+          "type": "integer",
+          "default": 1,
+          "description": "最大并行执行数"
+        },
+        "log_level": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"],
+          "default": "info"
+        },
+        "timeout": {
+          "type": "integer",
+          "default": 3600,
+          "description": "总流程超时时间（秒）"
+        }
+      }
+    }
+  }
+}

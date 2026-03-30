@@ -1,0 +1,23 @@
+# RPA工具依赖
+# 核心依赖
+click>=8.1.0
+pyyaml>=6.0.0
+jsonschema>=4.17.0
+jinja2>=3.1.0
+tabulate>=0.9.0
+python-dateutil>=2.8.2
+
+# 数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+openpyxl>=3.1.0
+xlsxwriter>=3.1.0
+
+# HTTP请求
+requests>=2.31.0
+
+# 并发
+concurrent-futures>=3.1.1
+
+# 飞书相关（已在主requirements中）
+# lark-oapi>=1.2.0

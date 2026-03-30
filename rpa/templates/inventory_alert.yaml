@@ -1,0 +1,84 @@
+# 示例：库存预警RPA流程
+name: 库存自动预警
+description: "每2小时检查一次库存，低于最小库存时发送预警通知"
+version: 1.0.0
+
+# 触发条件：每2小时执行一次
+trigger:
+  type: schedule
+  cron: "0 */2 * * *"
+
+# 全局变量配置
+variables:
+  # 飞书应用配置
+  feishu_app_id: "cli_xxxxxx"
+  feishu_app_secret: "xxxxxx"
+  # 多维表格配置
+  inventory_app_token: "AXDyb30BNamJJ6sMYh2cda7Gnxg"  # 库存表App Token
+  inventory_table_id: "tblcpk0OtPpxNwrs"  # 库存表Table ID
+  # 接收人配置
+  receiver_id: "ou_xxxxxx"  # 采购负责人Open ID
+
+# 流程步骤
+steps:
+  # 步骤1：从多维表格拉取所有库存数据
+  - name: 拉取库存数据
+    uses: feishu/bitable@1.0.0
+    with:
+      action: list_records
+      app_id: "${{ globals.feishu_app_id }}"
+      app_secret: "${{ globals.feishu_app_secret }}"
+      app_token: "${{ globals.inventory_app_token }}"
+      table_id: "${{ globals.inventory_table_id }}"
+    timeout: 60
+    retry: 2  # 失败重试2次
+
+  # 步骤2：筛选出库存不足的商品
+  - name: 筛选低库存商品
+    uses: data/process@1.0.0
+    with:
+      operation: filter
+      data: "${{ steps.拉取库存数据.output.data }}"
+      condition: "item.get('当前库存', 0) <= item.get('最小库存', 0)"
+
+  # 步骤3：统计低库存商品数量
+  - name: 统计低库存数量
+    uses: data/process@1.0.0
+    with:
+      operation: aggregate
+      data: "${{ steps.筛选低库存商品.output.data }}"
+      function: count
+
+  # 步骤4：如果有低库存商品，发送通知
+  - name: 发送库存预警
+    uses: feishu/message@1.0.0
+    if: "${{ steps.统计低库存数量.output.result > 0 }}"  # 只有当有低库存商品时才执行
+    with:
+      app_id: "${{ globals.feishu_app_id }}"
+      app_secret: "${{ globals.feishu_app_secret }}"
+      receive_id: "${{ globals.receiver_id }}"
+      content: |
+        ⚠️ 库存预警：有{{ steps.统计低库存数量.output.result }}个商品库存不足！
+        
+        {% for item in steps.筛选低库存商品.output.data %}
+        - 【{{ item.商品名称 }}】 当前库存：{{ item.当前库存 }}，最小库存：{{ item.最小库存 }}
+        {% endfor %}
+        
+        请及时安排补货！
+    timeout: 30
+
+# 执行失败时的回调
+on_failure:
+  - name: 发送流程失败告警
+    uses: feishu/message@1.0.0
+    with:
+      app_id: "${{ globals.feishu_app_id }}"
+      app_secret: "${{ globals.feishu_app_secret }}"
+      receive_id: "${{ globals.receiver_id }}"
+      content: "❌ 库存预警流程执行失败，请检查！错误信息：${{ error }}"
+
+# 流程设置
+settings:
+  log_level: info
+  timeout: 600  # 总超时10分钟
+  max_parallel: 1

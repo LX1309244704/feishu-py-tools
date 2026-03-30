@@ -1,0 +1,110 @@
+# 示例：每日销售报表自动生成流程
+name: 每日销售报表生成
+description: "工作日18点自动生成销售报表并发送群通知"
+version: 1.0.0
+
+# 触发条件：工作日18点执行
+trigger:
+  type: schedule
+  cron: "0 18 * * 1-5"
+
+# 全局变量
+variables:
+  feishu_app_id: "cli_xxxxxx"
+  feishu_app_secret: "xxxxxx"
+  sales_app_token: "xxxxxx"  # 销售表App Token
+  sales_table_id: "xxxxxx"  # 销售表Table ID
+  group_chat_id: "oc_xxxxxx"  # 部门群ID
+  receiver_id: "ou_xxxxxx"  # 负责人ID
+
+steps:
+  # 步骤1：拉取当日销售数据
+  - name: 拉取当日销售数据
+    uses: feishu/bitable@1.0.0
+    with:
+      action: list_records
+      app_id: "${{ globals.feishu_app_id }}"
+      app_secret: "${{ globals.feishu_app_secret }}"
+      app_token: "${{ globals.sales_app_token }}"
+      table_id: "${{ globals.sales_table_id }}"
+      params:
+        filter: "创建时间 = '{{ today() }}'"  # 筛选今日数据
+
+  # 步骤2：统计总销售额
+  - name: 统计总销售额
+    uses: data/process@1.0.0
+    with:
+      operation: aggregate
+      data: "${{ steps.拉取当日销售数据.output.data }}"
+      field: 金额
+      function: sum
+
+  # 步骤3：统计订单数量
+  - name: 统计订单数量
+    uses: data/process@1.0.0
+    with:
+      operation: aggregate
+      data: "${{ steps.拉取当日销售数据.output.data }}"
+      function: count
+
+  # 步骤4：按产品分类统计
+  - name: 产品分类统计
+    uses: data/process@1.0.0
+    with:
+      operation: group_by
+      data: "${{ steps.拉取当日销售数据.output.data }}"
+      field: 产品分类
+      agg: sum(金额)
+
+  # 步骤5：生成Excel报表
+  - name: 生成Excel报表
+    uses: file/operation@1.0.0
+    with:
+      action: write_excel
+      path: "销售日报_{{ today('%Y%m%d') }}.xlsx"
+      data: "${{ steps.拉取当日销售数据.output.data }}"
+
+  # 步骤6：发送群通知
+  - name: 发送销售报表通知
+    uses: feishu/message@1.0.0
+    with:
+      app_id: "${{ globals.feishu_app_id }}"
+      app_secret: "${{ globals.feishu_app_secret }}"
+      receive_id: "${{ globals.group_chat_id }}"
+      receive_id_type: chat_id
+      content: |
+        📊 【{{ today('%Y年%m月%d日') }}销售日报】
+        ------------------------
+        💰 总销售额：{{ steps.统计总销售额.output.result | round(2) }} 元
+        📦 订单数量：{{ steps.统计订单数量.output.result }} 单
+        
+        📈 产品分类销售：
+        {% for category, amount in steps.产品分类统计.output.result.items() %}
+        - {{ category }}：{{ amount | round(2) }} 元
+        {% endfor %}
+        
+        📎 详细数据见附件报表。
+      attachments:
+        - "${{ steps.生成Excel报表.output.file_path }}"
+
+on_success:
+  - name: 通知负责人
+    uses: feishu/message@1.0.0
+    with:
+      app_id: "${{ globals.feishu_app_id }}"
+      app_secret: "${{ globals.feishu_app_secret }}"
+      receive_id: "${{ globals.receiver_id }}"
+      content: "✅ 今日销售报表已成功生成并发送到部门群！"
+
+on_failure:
+  - name: 失败告警
+    uses: feishu/message@1.0.0
+    with:
+      app_id: "${{ globals.feishu_app_id }}"
+      app_secret: "${{ globals.feishu_app_secret }}"
+      receive_id: "${{ globals.receiver_id }}"
+      content: "❌ 今日销售报表生成失败！错误：${{ error }}"
+
+settings:
+  log_level: info
+  timeout: 1800  # 总超时30分钟
